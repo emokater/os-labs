@@ -33,7 +33,7 @@ int main() {
     sendMsg(1, nameCurFolder, fd, 0);
 
     printf("3. Получаю список файлов текущего каталога в которых встречается подстрока «define» и передаю их в очередь...\n");
-    FILE *pf = popen("grep -rl --exclude-dir=tests --exclude-dir=output 'define' .", "r");
+    FILE *pf = popen("grep -rl --exclude-dir=tests --exclude-dir=output --exclude-dir=.git 'define' .", "r");
     if (!pf) { perror("Ошибка popen :("); exit(1); }
 
     while (fgets(line, MSGMAX, pf)) {
