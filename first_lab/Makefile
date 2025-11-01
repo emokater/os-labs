@@ -30,5 +30,9 @@ test:
 	@./$(OBJDIR)/$(SERVER_TARGET)
 	@rm -rf info.txt kate_the_best.h text.txt without_define.c
 
+run_docker:
+# 	docker build -t os-lab-mq .            
+	docker run --rm -it os-lab-mq
+
 clean:
 	@rm -rf $(OBJDIR)

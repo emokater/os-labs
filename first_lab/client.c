@@ -1,11 +1,11 @@
-#include <sys/ipc.h> // IPC_CREAT
-#include <sys/msg.h> // msgget
-#include <stdlib.h> // exit
-#include <stdio.h> // perror
-#include <string.h> // memset
-#include <sys/types.h> // key_t
-#include <unistd.h> // getcwd
-#include <limits.h> // PATH_MAX
+#include <sys/ipc.h>
+#include <sys/msg.h>
+#include <stdlib.h> 
+#include <stdio.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <limits.h>
 
 #define MSGMAX 2048
 #define MSG_KEY 4
@@ -17,31 +17,34 @@ struct msgbuf {
 
 int createMQ(key_t key);
 void getTmpFolderName(char data[MSGMAX]);
-void sendMsg(long mtype_, char *text_, int fd, int flag);
+void sendMsg(long mtype_, char *text_, int qid, int flag);
 
 int main() {
     printf("Клиент:\n");
-    int fd, n;
+    int qid;
     char nameCurFolder[PATH_MAX], line[MSGMAX];
     memset(nameCurFolder, 0, PATH_MAX);
 
     printf("1. Cоздаю очередь сообщений...\n");
-    fd = createMQ(MSG_KEY);
+    qid = createMQ(MSG_KEY);
 
     printf("2. Получаю полное имя текущего каталога и передаю его в очередь...\n");
     getTmpFolderName(nameCurFolder);
-    sendMsg(1, nameCurFolder, fd, 0);
+    sendMsg(1, nameCurFolder, qid, 0);
 
     printf("3. Получаю список файлов текущего каталога в которых встречается подстрока «define» и передаю их в очередь...\n");
     FILE *pf = popen("grep -rl --exclude-dir=tests --exclude-dir=output --exclude-dir=.git 'define' .", "r");
-    if (!pf) { perror("Ошибка popen :("); exit(1); }
+    if (!pf) { 
+        perror("Ошибка popen :("); 
+        exit(1); 
+    }
 
     while (fgets(line, MSGMAX, pf)) {
         size_t len = strlen(line);
         if (len && line[len-1] == '\n') { line[len-1] = '\0'; }
         if (line[0] == '.' && line[1] == '/') { memmove(line, line+2, strlen(line+2) + 1);}
         if (line[0] == '\0') { continue; }
-        sendMsg(2, line, fd, 0);
+        sendMsg(2, line, qid, 0);
     }
 
     if (pclose(pf) == -1) {
@@ -53,12 +56,12 @@ int main() {
 }
 
 int createMQ(key_t key) {
-    int fd = msgget(key, IPC_CREAT | 0666);
-    if (fd == -1) { 
+    int qid = msgget(key, IPC_CREAT | 0666);
+    if (qid == -1) { 
         perror("Ошибка создания очереди :("); 
         exit(1); 
     }
-    return fd;
+    return qid;
 }
 
 void getTmpFolderName(char data[MSGMAX]) {
@@ -69,7 +72,7 @@ void getTmpFolderName(char data[MSGMAX]) {
     }
 }
 
-void sendMsg(long mtype_, char *text_, int fd, int flag) {
+void sendMsg(long mtype_, char *text_, int qid, int flag) {
     struct msgbuf msg;
     memset(msg.text, 0, MSGMAX);
 
@@ -79,7 +82,7 @@ void sendMsg(long mtype_, char *text_, int fd, int flag) {
     memcpy(msg.text, text_, len);
     msg.text[len] = '\0';
 
-    int res = msgsnd(fd, &msg, strlen(text_)+1, flag);
+    int res = msgsnd(qid, &msg, strlen(text_)+1, flag);
     if (res == -1) {
         perror("Ошибка передачи сообщения в очередь :(");
         exit(1);
