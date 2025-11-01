@@ -11,6 +11,4 @@ RUN apt-get update && \
 WORKDIR /app
 COPY . /app
 
-RUN make clean && make all
-
 CMD ["/bin/bash"]
