@@ -7,7 +7,7 @@
 #include <string.h> // memset strncpy
 #include <unistd.h> // close unlink getcwd
 #include <dirent.h> // DIR, struct dirent, opendir, readdir, closedir
-
+#include <sys/un.h> // struct sockaddr_un
 
 #define MAX_LEN 2048
 

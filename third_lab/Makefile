@@ -37,4 +37,4 @@ run-docker:
 	docker run --rm -it os-lab-3
 
 clean:
-	@rm -rf $(OBJDIR) serv.sock client.sock
+	@rm -rf $(OBJDIR) serv.sock client.sock .with_dot.txt without_dot.py

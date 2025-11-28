@@ -1,24 +1,12 @@
-#include <sys/un.h> // struct sockaddr_un
-#include <unistd.h> // getcwd
-#include <string.h> // memset strncpy
-
-#include <dirent.h> // DIR, struct dirent, opendir, readdir, closedir
-#include <sys/stat.h> // struct stat, stat, макрос S_ISREG
-
-#include <stdio.h> // printf
-#include <sys/socket.h> // socket/bind/recvfrom/sendto
-
 #include "../general.h"
 
 int main() {
     int sockfd;
     char name[MAX_LEN];
-    struct sockaddr_un serv_addr; // содержит информацию о локальном адресе для привязки
-    struct sockaddr_un client_addr;
+    struct sockaddr_un serv_addr, client_addr;
     socklen_t client_len;
     char buf[3];
-    int cnt_files = 0;
-    int res_from_client;
+    int cnt_files = 0, res_from_client = 0;
 
     printf("[server] cоздаю гнездо...\n");
     sockfd = socket(AF_UNIX, SOCK_DGRAM, 0);
@@ -47,7 +35,6 @@ int main() {
     recvfrom(sockfd, &res_from_client, sizeof(res_from_client), 0, NULL, NULL);
     printf("[server] результат: %d\n", res_from_client);
 
-    printf("[server] завершение работы...\n");
     close(sockfd);
     unlink(name);
 
